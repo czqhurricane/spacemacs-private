@@ -1062,8 +1062,7 @@ Image file name is generated from `match-end' position string."
   (defun callback-insert-header-to-org-content ()
     (insert-header-to-org-content (file-name-sans-extension in-file-org)))
 
-  (install-monitor-file-exists in-file-org 1 #'callback-insert-header-to-org-content)
-  )
+  (install-monitor-file-exists in-file-org 1 #'callback-insert-header-to-org-content))
 
 (defun hurricane/extract-content-from-official-accounts-to-org-file ()
   (interactive)

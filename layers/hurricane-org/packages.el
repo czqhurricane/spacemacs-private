@@ -233,7 +233,7 @@
       (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
       (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
       (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
-      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
+      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-roam-directory))
       (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
       (setq org-agenda-files (list org-agenda-dir org-agenda-file-note))
 
@@ -311,8 +311,7 @@
                         (language (gptel-context--buffer-suffix buffer)))
                     (with-current-buffer buffer
                       (let ((code (buffer-substring-no-properties start end)))
-                        (push (format "%s\n #+BEGIN_SRC %s\n%s\n#+END_SRC" (buffer-file-name) language code) selected-code))))))))
-          (reverse selected-code)))
+                        (push (format "%s\n\n#+BEGIN_SRC %s\n%s#+END_SRC\n" (buffer-file-name) language code) selected-code))))))))))
 
       (setq org-capture-templates
             '(("t" "Todo" entry (file+headline org-agenda-file-gtd "Workspace")
@@ -896,26 +895,6 @@
                        )))))
 
       (setq org-roam-node-formatter #'hurricane//org-roam-node-formatter)
-
-      (defun hurricane//org-roam-node-formatter (node)
-        (let ((title     (org-roam-node-title node))
-              (olp       (org-roam-node-olp node))
-              (level     (org-roam-node-level node))
-              (filetitle (org-roam-node-file-title node))
-              (separator " > ")
-              )
-          (pcase level
-            ;; node is a top-level file
-            (0 filetitle)
-            ;; node is a level 1 heading
-            (1 (concat filetitle separator file))
-            ;; node is a heading with an arbitrary outline path
-            (_ (concat filetitle
-                       separator
-                       (string-join olp " > ")
-                       separator
-                       title
-                       )))))
 
       (setq org-roam-node-display-template "${hierarchy:*} ${tags:8}")
       (setq org-roam-extract-new-file-path "${slug}.org")

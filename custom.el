@@ -51,6 +51,8 @@
      ("flagged" :foreground "#0a9dff")
      ("deleted" :foreground "#ff2c4b" :bold t)))
  '(objed-cursor-color "#dc322f")
+ '(org-agenda-files
+   '("/Users/c/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/org-gtd-tasks.org" "/Users/c/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/snippet.org"))
  '(org-html-table-default-attributes
    '(:border "2" :cellspacing "0" :cellpadding "6" :rules "groups" :frame "border"))
  '(org-pomodoro-length 45)
@@ -70,7 +72,20 @@
  '(rustic-ansi-faces
    ["#FDF6E3" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
  '(safe-local-variable-values
-   '((eval setq org-media-note-screenshot-image-dir
+   '((eval add-hook 'before-save-hook 'time-stamp)
+     (eval setq org-download-image-dir
+           (concat default-directory "./static/杂项/"))
+     (eval setq org-download-image-dir
+           (concat default-directory "./static/定义常量模块/"))
+     (eval setq org-download-image-dir
+           (concat default-directory "./static/difference-between-str-and-repr/"))
+     (eval setq org-download-image-dir
+           (concat default-directory "./static/设置 tower 的 diff 工具为 Kaleidoscope/"))
+     (eval setq org-download-image-dir
+           (concat default-directory "./static/用来管理 Python 虚拟环境 - virtualenvwrapper/"))
+     (eval setq org-media-note-screenshot-image-dir
+           (concat default-directory "./static/Github 配置 SSH 免密登录/"))
+     (eval setq org-media-note-screenshot-image-dir
            (concat default-directory "./static/snippet/"))
      (eval setq org-media-note-screenshot-image-dir
            (concat default-directory "./static/Readme/"))

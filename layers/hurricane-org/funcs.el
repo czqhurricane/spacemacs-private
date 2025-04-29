@@ -1554,11 +1554,11 @@ update occurred, not counting content."
 (defun pdf-tools-annotations-db--dummy ()
   "Create an empty dummy database for Emacs 25 and earlier."
   (list :version "0.0.3"
-        :feeds #s(hash-table size 65
-                             test equal
-                             rehash-size 1.5
-                             rehash-threshold 0.8
-                             data ())
+        ;; :feeds #s(hash-table size 65
+        ;;                      test equal
+        ;;                      rehash-size 1.5
+        ;;                      rehash-threshold 0.8
+        ;;                      data ())
         :entries #s(hash-table size 65
                                test equal
                                rehash-size 1.5
@@ -1595,7 +1595,7 @@ update occurred, not counting content."
 (defun pdf-tools-annotations-db--empty ()
   "Create an empty database object."
   `(:version ,pdf-tools-annotations-db-version
-             :feeds ,(make-hash-table :test 'equal)
+             ;; :feeds ,(make-hash-table :test 'equal)
              :entries ,(make-hash-table :test 'equal)
              ;; Compiler may warn about this (bug#15327):
              :index ,(avl-tree-create #'pdf-tools-annotations-db--compare)))
@@ -1859,6 +1859,7 @@ their contents."
     (message "Please enter a valid integer.")))
 
 (with-eval-after-load 'pdf-tools
+  (require 'evil)
   (evil-define-key '(normal insert emacs motion) pdf-view-mode-map
     (kbd "p") #'hurricane//pdf-view-goto-page
     (kbd "j") #'pdf-view-next-line-or-next-page

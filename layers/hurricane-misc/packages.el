@@ -1374,8 +1374,7 @@
   (with-eval-after-load 'eaf-image-viewer
     (eaf-bind-key eaf-ocr-buffer "z" eaf-image-viewer-keybinding)
     (eaf-bind-key eaf-ocr-area "Z" eaf-image-viewer-keybinding)
-    (eaf-bind-key eaf-image-viewer-create-occlusion "q" eaf-image-viewer-keybinding)
-    )
+    (eaf-bind-key eaf-image-viewer-create-occlusion "q" eaf-image-viewer-keybinding))
 
   (with-eval-after-load 'eaf-browser
     (defun eaf-browser-youtube-video-pause-toggle ()
@@ -1461,7 +1460,7 @@ This function works best if paired with a fuzzy search package."
     :config
     (setq blink-search-search-backends '("Grep PDF" "PDF" "Buffer List" "Find File" "Common Directory" "Recent File" "Grep File" "IMenu" "EAF Browser")
           blink-search-grep-pdf-backend 'pdf-tools
-          blink-search-grep-pdf-search-paths '("/Users/c/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/WebDownloads/" "/Users/c/Downloads/" "/Users/c/Documents/论文期刊/"))
+          blink-search-grep-pdf-search-paths '("/Users/c/Documents/论文期刊/"))
 
     (defun hurricane//blink-search-grep-pdf-do (file page submatches)
       ;;highlight the matches
@@ -2098,7 +2097,7 @@ Works only in youtube-sub-extractor-mode buffer."
                                     (encode-coding-string (funcall secret) 'utf-8)
                                   secret)
                               (user-error "No `gptel-api-key' found in the auth source"))))
-            :models '("deepseek-chat" "deepseek-coder")))))
+            :models '("deepseek-reasoner" "deepseek-chat" "deepseek-coder")))))
 
 (defun hurricane-misc/init-dogears ()
   (use-package dogears
