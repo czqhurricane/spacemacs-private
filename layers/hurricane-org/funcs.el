@@ -1377,12 +1377,12 @@ Show the heading too, if it is currently invisible."
 
 (defun hurricane//pdf-tools-insert-noter-page-link-action (x)
   (insert
-   (format "[[%s:%s#%s][%s]]" org-noter-property-note-location (elt x 4)
+   (format "[[%s:%s#%s][%s]]" org-noter-property-note-location (elt x 5)
            (cons
-            (elt x 1)
-            (cons (nth 1 (elt x 2))
-                  (nth 0 (elt x 2))))
-           (concat (elt x 3) " < " (elt x 5) " < " (file-name-nondirectory (elt x 4))))))
+            (elt x 2)
+            (cons (nth 1 (elt x 3))
+                  (nth 0 (elt x 3))))
+           (concat (elt x 4) " < " (elt x 6) " < " (file-name-nondirectory (elt x 5))))))
 
 (with-eval-after-load 'ivy
   (ivy-add-actions
@@ -1431,7 +1431,7 @@ update occurred, not counting content."
   (setf (pdf-tools-annotations-entry-content a) (pdf-tools-annotations-entry-content b))
   (not
    (zerop
-    (cl-loop for i from 1 below (length a)
+    (cl-loop for i from 1 below (1- (length a))
              for part-a = (aref a i)
              for part-b = (aref b i)
              count (not (equal part-a part-b))
@@ -1530,22 +1530,34 @@ update occurred, not counting content."
   (pdf-tools-annotations-db--ensure)
   (gethash id pdf-tools-annotations-db-entries))
 
+;; 要处理 entry-a 或 entry-b 为 nil 的情况。
+;; 当entry-a 或 entry-b任一一个为nil时，不做edge case 处理，pdf-tools-annotations-entry-modified 函数会抛出错误，
+;; 导致与avl-tree--cmpfun 相关的 avl-tree-delete avl-tree-enter 调用时出错。
 (defun pdf-tools-annotations-db--compare (a b)
-  "Return true if entry A is newer than entry B."
+  "Return true if entry A is newer than entry B.
+Handles cases where either entry is nil."
   (let* ((entry-a (pdf-tools-annotations-db--get-entry a))
-         (entry-b (pdf-tools-annotations-db--get-entry b))
-         (date-a (nth 0 (pdf-tools-annotations-entry-modified entry-a)))
-         (date-b (nth 0 (pdf-tools-annotations-entry-modified entry-b)))
-         (time-a (nth 1 (pdf-tools-annotations-entry-modified entry-a)))
-         (time-b (nth 1 (pdf-tools-annotations-entry-modified entry-b))))
-    (if (= date-a date-b)
-        (if (= time-a time-b)
-            (string< (prin1-to-string b) (prin1-to-string a))
-          (> time-a time-b))
-      (> date-a date-b))))
+         (entry-b (pdf-tools-annotations-db--get-entry b)))
+    (cond
+     ;; Both entries are nil: compare strings as fallback
+     ((and (null entry-a) (null entry-b))
+      (string< (prin1-to-string b) (prin1-to-string a)))
 
-(defun pdf-tools-annotations-db--delete-compare (a b)
-  (equal (prin1-to-string b) (prin1-to-string a)))
+     ;; If only one is nil, treat the nil entry as "newer"
+     ((null entry-a) nil)  ; A is nil, so B is considered "newer"
+     ((null entry-b) t)    ; B is nil, so A is considered "newer"
+
+     ;; Normal case: compare dates and times
+     (t
+      (let ((date-a (nth 0 (pdf-tools-annotations-entry-modified entry-a)))
+            (date-b (nth 0 (pdf-tools-annotations-entry-modified entry-b)))
+            (time-a (nth 1 (pdf-tools-annotations-entry-modified entry-a)))
+            (time-b (nth 1 (pdf-tools-annotations-entry-modified entry-b))))
+        (if (= date-a date-b)
+            (if (= time-a time-b)
+                (string< (prin1-to-string b) (prin1-to-string a))
+              (> time-a time-b))
+          (> date-a date-b)))))))
 
 (defun pdf-tools-annotations-db--set-update-time ()
   "Update the database last-update time."
@@ -1771,28 +1783,10 @@ update occurred, not counting content."
         (prin1 pdf-tools-annotations-db)
         :success))))
 
-(defun pdf-tools-annotations-db--delete (key)
+(defun pdf-tools-annotations-db--delete (id)
   (pdf-tools-annotations-db--ensure)
-  (let ((coding-system-for-write 'utf-8))
-    (with-temp-file (expand-file-name "index" pdf-tools-annotations-db-directory)
-      (let ((standard-output (current-buffer))
-            (print-level nil)
-            (print-length nil)
-            (print-circle nil))
-        (remhash key pdf-tools-annotations-db-entries)
-        (let ((original-cmpfun (avl-tree--cmpfun pdf-tools-annotations-db-index)))
-          (setf (avl-tree--cmpfun pdf-tools-annotations-db-index) #'pdf-tools-annotations-db--delete-compare)
-          (avl-tree-delete pdf-tools-annotations-db-index key)
-          (setf (avl-tree--cmpfun pdf-tools-annotations-db-index) original-cmpfun))
-        (princ (format ";;; Elfeed Database Index (version %s)\n\n"
-                       pdf-tools-annotations-db-version))
-        (when (eql pdf-tools-annotations-db-version 4)
-          ;; Put empty dummy index in front
-          (princ ";; Dummy index for backwards compatablity:\n")
-          (prin1 (pdf-tools-annotations-db--dummy))
-          (princ "\n\n;; Real index:\n"))
-        (prin1 pdf-tools-annotations-db)
-        :success))))
+  (avl-tree-delete pdf-tools-annotations-db-index id)
+  (remhash id pdf-tools-annotations-db-entries))
 
 (defun not-nil (x)
   (not (null x)))
@@ -1848,7 +1842,9 @@ their contents."
 
 (defun pdf-tools-annotations-delete (origfunc id &optional file-or-buffer)
   (funcall origfunc id file-or-buffer)
-  (ignore-errors (pdf-tools-annotations-db--delete (format "%s#%s" (pdf-tools-get-pdf-full-filepath) id))))
+  (ignore-errors
+    (pdf-tools-annotations-db--delete (format "%s#%s" (pdf-tools-get-pdf-full-filepath) id))
+    (pdf-tools-annotations-db--save)))
 
 (advice-add #'pdf-info-delannot :around #'pdf-tools-annotations-delete)
 
