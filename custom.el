@@ -72,7 +72,9 @@
  '(rustic-ansi-faces
    ["#FDF6E3" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
  '(safe-local-variable-values
-   '((eval add-hook 'before-save-hook 'time-stamp)
+   '((eval setq org-media-note-screenshot-image-dir
+           (concat default-directory "./static/日志/"))
+     (eval add-hook 'before-save-hook 'time-stamp)
      (eval setq org-download-image-dir
            (concat default-directory "./static/杂项/"))
      (eval setq org-download-image-dir

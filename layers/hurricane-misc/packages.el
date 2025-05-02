@@ -92,6 +92,8 @@
                                         :repo "lorniu/go-translate"))
         gptel
         dogears
+        (cleandesk :location (recipe :fetcher github
+                                     :repo "rtrppl/cleandesk"))
         ))
 
 (defconst sys/macp
@@ -1943,7 +1945,7 @@ Works only in youtube-sub-extractor-mode buffer."
 (defun hurricane-misc/init-eaf-interleave ()
   (use-package eaf-interleave
     :config
-    (setq eaf-interleave--page-note-prop "NOTER_PAGE")
+    (setq eaf-interleave--page-note-prop "NOTER_DOCUMENT")
     :custom
     (eaf-interleave-org-notes-dir-list (list (concat deft-dir (file-name-as-directory "notes"))))
     :after eaf))
@@ -2286,3 +2288,28 @@ context.  PLACE should be a bookmark record."
         (tabulated-list-init-header)
         (tabulated-list-revert))
       )))
+
+(defun hurricane-misc/init-cleandesk ()
+  (use-package cleandesk
+    :config
+    (require 'psearch)
+
+    (with-eval-after-load 'psearch
+      (psearch-patch cleandesk-prepare-folder-list
+        (psearch-replace
+         '`(concat "find " cleandesk-data-folder " " cleandesk-find-metadata-cmd)
+         '`(concat "find " (shell-quote-argument cleandesk-data-folder) " " cleandesk-find-metadata-cmd))))
+
+    (defun cleandesk-dedup-folders-advice (orig-fun &rest args)
+      (apply orig-fun args)
+      (setcdr (last cleandesk-folders) nil)
+      (setq cleandesk-folders (cl-delete-duplicates cleandesk-folders :test #'string=)))
+
+    (advice-add 'cleandesk-prepare-folder-list :around #'cleandesk-dedup-folders-advice)
+
+    (setq cleandesk-metadata-tool "find"
+          cleandesk-search-tool "rga"
+          cleandesk-inbox-folder (file-truename (concat deft-dir (file-name-as-directory "notes")))
+          cleandesk-data-folders (list (file-truename (concat deft-dir (file-name-as-directory "notes")))
+                                       "/Users/c/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/"
+                                       ))))

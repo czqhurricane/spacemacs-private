@@ -1376,13 +1376,19 @@ Show the heading too, if it is currently invisible."
                       )))
 
 (defun hurricane//pdf-tools-insert-noter-page-link-action (x)
-  (insert
-   (format "[[%s:%s#%s][%s]]" org-noter-property-note-location (elt x 5)
-           (cons
-            (elt x 2)
-            (cons (nth 1 (elt x 3))
-                  (nth 0 (elt x 3))))
-           (concat (elt x 4) " < " (elt x 6) " < " (file-name-nondirectory (elt x 5))))))
+  (cond ((equal 'org-roam (elt x 1))
+         (let ((content (with-current-buffer (find-file-noselect (elt x 2))
+                          (goto-char (elt x 3))
+                          (format "[[%s:%s#%s][%s]]" org-noter-property-note-location (org-entry-get nil org-noter-property-doc-file t) (org-noter--parse-location-property (org-entry-get-with-inheritance org-noter-property-note-location)) (elt x 0)))))
+           (insert content)))
+        ((equal 'pdf-tools (elt x 1))
+         (insert
+          (format "[[%s:%s#%s][%s]]" org-noter-property-note-location (elt x 5)
+                  (cons
+                   (elt x 2)
+                   (cons (nth 1 (elt x 3))
+                         (nth 0 (elt x 3))))
+                  (concat (elt x 4) " < " (elt x 6) " < " (file-name-nondirectory (elt x 5))))))))
 
 (with-eval-after-load 'ivy
   (ivy-add-actions
