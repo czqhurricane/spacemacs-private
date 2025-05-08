@@ -94,6 +94,7 @@
         dogears
         (cleandesk :location (recipe :fetcher github
                                      :repo "rtrppl/cleandesk"))
+        smartparens
         ))
 
 (defconst sys/macp
@@ -449,9 +450,7 @@
       ("g" customize-apropos-groups "groups")
       ("o" customize-apropos-options "options"))
 
-    ;; (define-key global-map (kbd "<f1>") 'hydra-hotspots/body)
     (spacemacs/set-leader-keys "oo" 'hydra-hotspots/body)
-    ;; (bind-key*  "<f4>" 'hydra-apropos/body)
     (spacemacs/set-leader-keys "oh" 'hydra-apropos/body)))
 
 (defun hurricane-misc/post-init-gist ()
@@ -497,15 +496,14 @@
                 ("P" . peep-dired))))
 
 (defun hurricane-misc/post-init-flyspell-correct ()
-  (progn
-    (with-eval-after-load 'flyspell
-      (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic))
+  (with-eval-after-load 'flyspell
+    (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
     (setq flyspell-correct-interface 'flyspell-correct-ivy)))
 
 (defun hurricane-misc/post-init-smartparens ()
-  (progn
+  (with-eval-after-load 'smartparens
     (smartparens-global-mode t)
-    (global-set-key (kbd "C-(") 'hurricane/wrap-sexp-with-new-round-parens)
+    (bind-key* "C-(" #'hurricane//wrap-sexp-with-new-round-parens)
     ;; 写 lisp 时不成对补全 "'" 和 "`"。
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
     (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
@@ -519,7 +517,7 @@
 (defun hurricane-misc/init-tiny ()
   (use-package tiny
     :init
-    (spacemacs/set-leader-keys "oe" 'tiny-expand)))
+    (spacemacs/set-leader-keys "oe" #'tiny-expand)))
 
 (defun hurricane-misc/init-helm-github-stars ()
   (use-package helm-github-stars
@@ -546,12 +544,15 @@
       (setq osx-dictionary-use-chinese-text-segmentation t))))
 
 (defun hurricane-misc/post-init-avy ()
-  (progn
-    (global-set-key (kbd "C-M-'") 'avy-goto-char-2)
-    (global-set-key (kbd "M-'") 'avy-goto-char)))
+  (with-eval-after-load 'avy
+    (bind-keys
+     :map global-map
+     ("C-M-'" . #'avy-goto-char-2)
+     ("M-'" . #'avy-goto-char))))
 
 (defun hurricane-misc/post-init-ace-window ()
-  (global-set-key (kbd "C-x C-o") #'ace-window))
+  (with-eval-after-load 'ace-window
+    (bind-key* "C-x C-o" #'ace-window)))
 
 (defun hurricane-misc/init-discover-my-major ()
   (use-package discover-my-major
@@ -668,23 +669,19 @@
 
 (defun hurricane-misc/init-visual-regexp-steroids ()
   (use-package visual-regexp-steroids
-    :commands (vr/select-replace vr/select-query-replace)
-    :init
-    (progn
-      (define-key global-map (kbd "C-c r") 'vr/replace)
-      (define-key global-map (kbd "C-c q") 'vr/query-replace))))
+    :commands (vr/select-replace vr/select-query-replace)))
 
 (defun hurricane-misc/init-multiple-cursors ()
   (use-package multiple-cursors
     :init
     (progn
-      (bind-key* "s-." 'mc/mark-next-like-this)
-      (bind-key* "s-," 'mc/mark-previous-like-this)
-      (bind-key* "s->" 'mc/unmark-next-like-this)
-      (bind-key* "s-<" 'mc/unmark-previous-like-this)
-      (bind-key* "s-=" 'mc/skip-to-next-like-this)
-      (bind-key* "s--" 'mc/skip-to-previous-like-this)
-      (bind-key* "s-`" 'mc/mark-all-like-this)
+      (bind-key* "s-." #'mc/mark-next-like-this)
+      (bind-key* "s-," #'mc/mark-previous-like-this)
+      (bind-key* "s->" #'mc/unmark-next-like-this)
+      (bind-key* "s-<" #'mc/unmark-previous-like-this)
+      (bind-key* "s-=" #'mc/skip-to-next-like-this)
+      (bind-key* "s--" #'mc/skip-to-previous-like-this)
+      (bind-key* "s-`" #'mc/mark-all-like-this)
 
       ;; @See: http://endlessparentheses.com/multiple-cursors-keybinds.html?source=rss
       (define-prefix-command 'endless/mc-map)
@@ -957,7 +954,7 @@
         (toggle-read-only))
       (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
       (add-hook 'shell-mode-hook (lambda () (highlight-regexp
-                                             "\\[OK\\]" "hi-green-b")))
+                                        "\\[OK\\]" "hi-green-b")))
       ;; Make `URLs' clickable.
       (add-hook 'shell-mode-hook (lambda ()(goto-address-mode)))
 
@@ -1413,8 +1410,8 @@ This function works best if paired with a fuzzy search package."
                                        (if history-file-exists
                                            (mapcar
                                             (lambda (h) (when (string-match history-pattern h)
-                                                          (if (file-exists-p h)
-                                                              (format "%s" h))))
+                                                     (if (file-exists-p h)
+                                                         (format "%s" h))))
                                             (with-temp-buffer (insert-file-contents pdf-history-file-path)
                                                               (split-string (buffer-string) "\n" t)))
                                          (make-directory (file-name-directory pdf-history-file-path) t)
@@ -2107,8 +2104,6 @@ Works only in youtube-sub-extractor-mode buffer."
     :config
     (setq dogears-idle nil
           dogears-limit 200)
-    (global-set-key (kbd "<C-f1>") #'(lambda () (interactive) (command-execute #'dogears-remember 'record)))
-    (global-set-key (kbd "<C-f2>") #'(lambda () (interactive) (command-execute #'dogears-list 'record)))
 
     (with-eval-after-load 'dogears
       (evil-define-key '(normal insert emacs motion) dogears-list-mode-map
@@ -2116,8 +2111,7 @@ Works only in youtube-sub-extractor-mode buffer."
         (kbd "k") #'previous-line
         (kbd "d") #'dogears-list-delete
         (kbd "RET") #'dogears-list-go
-        (kbd "q") #'quit-window
-        )
+        (kbd "q") #'quit-window)
 
       (defun hurricane//dogears--place (&optional manualp)
         "Return record for current buffer at point."

@@ -193,6 +193,8 @@
                                    (local-set-key (kbd "C-l")
                                                   'evil-insert)))
 
+      (add-hook 'org-mode-hook #'(lambda () (visual-line-mode)))
+
       (setq org-latex-create-formula-image-program 'dvipng)
       (setq org-latex-listings 'minted)
       (setq org-latex-minted-options
@@ -366,12 +368,18 @@
 
       ;; (org-link-set-parameters "video" :export 'hurricane//org-video-link-export)
 
-      (define-key evil-normal-state-map (kbd "C-c C-w") #'org-refile)
-      (define-key global-map (kbd "<f9>") #'popweb-org-roam-node-preview-select)
-      (define-key org-mode-map (kbd "<f9>") #'popweb-org-roam-link-preview-select)
-      (define-key org-mode-map (kbd "<f8>") #'popweb-org-roam-node-backlinks-preview)
-      (define-key org-mode-map (kbd "<f11>") #'org-transclusion-make-from-link)
-      (define-key org-mode-map (kbd "<f12>") #'org-transclusion-mode)
+      (bind-keys
+       :map evil-normal-state-map
+       ("C-c C-w" . #'org-refile)
+
+       :map global-map
+       ("<f9>" . #'popweb-org-roam-node-preview-select)
+
+       :map org-mode-map
+       ("<f9>" . #'popweb-org-roam-link-preview-select)
+       ("<f8>" . #'popweb-org-roam-node-backlinks-preview)
+       ("<f11>" . #'org-transclusion-make-from-link)
+       ("<f12>" . #'org-transclusion-mode))
 
       (setq org-publish-project-alist
             `(("orgfiles"

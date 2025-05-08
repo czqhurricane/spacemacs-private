@@ -385,11 +385,12 @@ end tell
       (mc/mark-next-like-this 1)
     (er/expand-region 1)))
 
-(defun hurricane/wrap-sexp-with-new-round-parens ()
+(defun hurricane//wrap-sexp-with-new-round-parens ()
   (interactive)
   (insert "()")
   (backward-char)
-  (sp-forward-slurp-sexp))
+  (when (sp-get-thing)
+    (sp-forward-slurp-sexp)))
 
 (defun hurricane//evil-paste-after-from-0 ()
   (interactive)
@@ -1881,8 +1882,6 @@ Version 2019-02-12 2021-08-09"
                             (goldendict--render-html
                              (goldendict--query-api-call suggestion))
                             )))))
-
-(define-key global-map (kbd "<f4>") #'hurricane/goldendict-find)
 ;; }}
 
 (defun hurricane//popweb-silver-dict-query (suggestion)
