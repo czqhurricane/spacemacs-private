@@ -1333,7 +1333,7 @@ Show the heading too, if it is currently invisible."
      (let* ((node-hierarchy (org-roam-node-hierarchy node))
             (org-filepath (org-roam-node-file node))
             (point (org-roam-node-point node))
-            (noter-page (cdr (assoc "NOTER_PAGE" (org-roam-node-properties node)))))
+            (noter-page (cdr (assoc org-noter-property-note-location (org-roam-node-properties node)))))
        (list
         node-hierarchy
         'org-roam
@@ -1354,7 +1354,7 @@ Show the heading too, if it is currently invisible."
                      (org-roam-node-list))
                     ;; (org-roam-collect-annotations-for-ivy
                     ;;  (seq-filter
-                    ;;   (lambda (node) (assoc "NOTER_PAGE" (org-roam-node-properties node)))
+                    ;;   (lambda (node) (assoc org-noter-property-note-location (org-roam-node-properties node)))
                     ;;   (org-roam-node-list)))
                     )
             :initial-input (or query (hurricane//region-or-word))
@@ -1364,15 +1364,15 @@ Show the heading too, if it is currently invisible."
                              ;; (goto-char (elt data 3))
                              ;; (hurricane/open-noter-page))
                              (org-roam-node-visit (elt data 4) nil)
-                             (when (assoc "NOTER_PAGE" (org-roam-node-properties (elt data 4)))
+                             (when (assoc org-noter-property-note-location (org-roam-node-properties (elt data 4)))
                                (hurricane/open-noter-page)))
                             ((equal 'pdf-tools (elt data 1))
                              (org-link-open-from-string
-                              (format "[[%s:%s#%s]]" org-noter-property-note-location (elt data 5)
-                                      (cons
-                                       (elt data 2)
-                                       (cons (nth 1 (elt data 3))
-                                             (nth 0 (elt data 3))))))))
+                              (url-unhex-string (format "[[%s:%s#%s]]" org-noter-property-note-location (elt data 5)
+                                                        (cons
+                                                         (elt data 2)
+                                                         (cons (nth 1 (elt data 3))
+                                                               (nth 0 (elt data 3)))))))))
                       )))
 
 (defun hurricane//pdf-tools-insert-noter-page-link-action (x)

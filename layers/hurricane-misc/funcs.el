@@ -888,9 +888,9 @@ Else, returns STRING."
                         (goto-char $p0)
                         (buffer-substring-no-properties $p1 $p2))))
          )
-    (if (and pdf-url page-location)
-        (org-link-open-from-string (format "[[%s:%s#%s]]" org-noter-property-note-location pdf-url page-location))
-      (org-link-open-from-string $inputStr))))
+    (if (and pdf-url page-location (not (use-region-p)))
+        (org-link-open-from-string (url-unhex-string (format "[[%s:%s#%s]]" org-noter-property-note-location pdf-url page-location)))
+      (org-link-open-from-string (url-unhex-string $inputStr)))))
 
 (defun hurricane/open-link-in-chrome ()
   "Open `url' under cursor in Chrome.

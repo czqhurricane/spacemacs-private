@@ -370,16 +370,16 @@
 
       (bind-keys
        :map evil-normal-state-map
-       ("C-c C-w" . #'org-refile)
+       ("C-c C-w" . org-refile)
 
        :map global-map
-       ("<f9>" . #'popweb-org-roam-node-preview-select)
+       ("<f9>" . popweb-org-roam-node-preview-select)
 
        :map org-mode-map
-       ("<f9>" . #'popweb-org-roam-link-preview-select)
-       ("<f8>" . #'popweb-org-roam-node-backlinks-preview)
-       ("<f11>" . #'org-transclusion-make-from-link)
-       ("<f12>" . #'org-transclusion-mode))
+       ("<f9>" . popweb-org-roam-link-preview-select)
+       ("<f8>" . popweb-org-roam-node-backlinks-preview)
+       ("<f11>" . org-transclusion-make-from-link)
+       ("<f12>" . org-transclusion-mode))
 
       (setq org-publish-project-alist
             `(("orgfiles"
@@ -867,7 +867,7 @@
               (filetitle (org-roam-node-file-title node))
               (separator (propertize " < " 'face 'shadow))
               )
-          (when (assoc "NOTER_PAGE" (org-roam-node-properties node))
+          (when (assoc org-noter-property-note-location (org-roam-node-properties node))
             (setq title (propertize title 'face '((:foreground "DarkGoldenrod2")))))
           (cl-case level
             ;; node is a top-level file
@@ -1687,6 +1687,7 @@ REMINDER-DATE is the YYYY-MM-DD string for when you want this to come up again."
     :ensure t
     :custom
     (org-noter-always-create-frame nil)
+    (org-noter-property-note-location "NOTERPAGE")
     :config
     (defun hurricane//org-noter-start-from-dired ()
       "In Dired, open sessions for marked files or file at point.
@@ -1897,6 +1898,10 @@ marked file."
 
     (advice-add #'counsel-org-goto-action :override #'hurricane//counsel-org-goto-action)
 
+    (defun hurricane//url-hexify-space-only (string)
+      "只对字符串中的空格进行URL编码。"
+      (replace-regexp-in-string " +" (lambda (s) (url-hexify-string s)) string))
+
     (defun hurricane//org-noter-get-link ()
       (format "%s:%s#%s" org-noter-property-note-location (buffer-file-name) (org-noter-pdf--approx-location-cons 'pdf-view-mode (org-noter-pdf--pdf-view-get-precise-info 'pdf-view-mode (get-buffer-window)))))
 
@@ -1947,9 +1952,9 @@ marked file."
                                                          (mapconcat 'identity (pdf-view-active-region-text) ? ))))
                     ;; (desc (concat file ".pdf: Page " page (when quote (concat "; Quoting: " quote))))
                     (desc (concat (when quote (concat quote " < ")) outlines " < " file ".pdf"))
-                    (link (hurricane//org-noter-get-link)))
+                    (link (hurricane//url-hexify-space-only (hurricane//org-noter-get-link))))
                (if pdf-view--have-rectangle-region
-                   (kill-new (format "<a onclick=\"(function() {javascript:location.href = \'org-protocol://open-pdf?pdf-tools=%s\'})()\">%s</a>" (url-hexify-string (format "[[%s]]" link)) (or desc link)))
+                   (kill-new (format "<a onclick=\"(function() {javascript:location.href = \'org-protocol://open-pdf?pdf-tools=%s\'})()\">%s</a>" (hurricane//url-hexify-space-only (format "[[%s]]" link)) (or desc link)))
                  (kill-new (format "[[%s]][[%s]]" link desc)))
                (org-link-store-props
                 :type org-noter-property-note-location
@@ -1971,7 +1976,7 @@ marked file."
                     (quote (nth 3 info))
                     ;; (desc (concat (file-name-nondirectory file) ": Page " page (when quote (concat "; Quoting: " quote))))
                     (desc (concat (when quote (concat quote " < ")) outlines " < " (file-name-nondirectory file)))
-                    (link (format "%s:%s#%s" org-noter-property-note-location file location)))
+                    (link (hurricane//url-hexify-space-only (format "%s:%s#%s" org-noter-property-note-location file location))))
                (kill-new (format "[[%s]][[%s]]" link desc))
                (org-link-store-props
                 :type org-noter-property-note-location
@@ -2008,7 +2013,7 @@ marked file."
       (let ((ext (file-name-extension path)))
         (cond
          ((eq 'html backend)
-          (format "<a onclick=\"(function() {javascript:location.href = \'org-protocol://open-pdf?pdf-tools=%s\'})()\">%s</a>" (url-hexify-string (format "[[%s:%s]]" org-noter-property-note-location path)) (or desc path))
+          (format "<a onclick=\"(function() {javascript:location.href = \'org-protocol://open-pdf?pdf-tools=%s\'})()\">%s</a>" (hurricane//url-hexify-space-only (format "[[%s:%s]]" org-noter-property-note-location path)) (or desc path))
           )
          ;; fall-through case for everything else.
          (t

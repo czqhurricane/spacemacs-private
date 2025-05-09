@@ -16,7 +16,7 @@
         avy
         tiny
         ;; flyspell-correct
-        ;; peep-dired
+        peep-dired
         ;; markdown-mode
         swiper
         magit
@@ -547,8 +547,8 @@
   (with-eval-after-load 'avy
     (bind-keys
      :map global-map
-     ("C-M-'" . #'avy-goto-char-2)
-     ("M-'" . #'avy-goto-char))))
+     ("C-M-'" . avy-goto-char-2)
+     ("M-'" . avy-goto-char))))
 
 (defun hurricane-misc/post-init-ace-window ()
   (with-eval-after-load 'ace-window
@@ -954,7 +954,7 @@
         (toggle-read-only))
       (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
       (add-hook 'shell-mode-hook (lambda () (highlight-regexp
-                                        "\\[OK\\]" "hi-green-b")))
+                                             "\\[OK\\]" "hi-green-b")))
       ;; Make `URLs' clickable.
       (add-hook 'shell-mode-hook (lambda ()(goto-address-mode)))
 
@@ -1410,8 +1410,8 @@ This function works best if paired with a fuzzy search package."
                                        (if history-file-exists
                                            (mapcar
                                             (lambda (h) (when (string-match history-pattern h)
-                                                     (if (file-exists-p h)
-                                                         (format "%s" h))))
+                                                          (if (file-exists-p h)
+                                                              (format "%s" h))))
                                             (with-temp-buffer (insert-file-contents pdf-history-file-path)
                                                               (split-string (buffer-string) "\n" t)))
                                          (make-directory (file-name-directory pdf-history-file-path) t)

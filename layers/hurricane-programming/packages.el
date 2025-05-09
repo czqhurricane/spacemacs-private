@@ -54,6 +54,9 @@
     (tree-sitter-langs (recipe
                         :fetcher github
                         :repo "emacs-tree-sitter/tree-sitter-langs"))
+    (aidermacs (recipe
+                :fetcher github
+                :repo "MatthewZMD/aidermacs"))
     ))
 
 (defun hurricane-programming/init-virtualenvwrapper ()
@@ -410,3 +413,24 @@
 (defun hurricane-programming/init-tree-sitter-langs ()
   (use-package tree-sitter-langs
     :ensure t))
+
+(defun hurricane-programming/init-aidermacs ()
+  (use-package aidermacs
+    :ensure t
+    :config
+    (setenv
+     "DEEPSEEK_API_KEY"
+     (funcall (lambda ()
+                (if-let* ((auth-info (car (auth-source-search
+                                           :host "api.deepseek.com"
+                                           :user "apikey"
+                                           :require '(:secret))))
+                          (secret (plist-get auth-info :secret)))
+                    (if (functionp secret)
+                        (encode-coding-string (funcall secret) 'utf-8)
+                      secret)
+                  (user-error "No `gptel-api-key' found in the auth source")))))
+    :custom
+    (aidermacs-use-architect-mode t)
+    (aidermacs-architect-model "deepseek/deepseek-reasoner")
+    (aidermacs-editor-model "deepseek/deepseek-reasoner")))
