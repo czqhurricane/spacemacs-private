@@ -142,3 +142,13 @@
      ((file-exists-p corresponding-file-candicate-0) (find-file corresponding-file-candicate-0))
      ((file-exists-p corresponding-file-candicate-1) (find-file corresponding-file-candicate-1))
      (t (message "Corresponding file does not exist: %s" corresponding-file)))))
+
+(defun hurricane//load-yasnippet ()
+  (progn
+    (setq my-snippet-dir (expand-file-name snippet-dir))
+    (setq yas-snippet-dirs '(my-snippet-dir))
+    (yas-load-directory my-snippet-dir)
+    (setq yas-wrap-around-region t)
+    (setq yas-indent-line 'fixed)
+    (setq yas-verbosity 0)
+    (yas-minor-mode)))

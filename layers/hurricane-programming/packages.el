@@ -57,6 +57,7 @@
     (aidermacs (recipe
                 :fetcher github
                 :repo "MatthewZMD/aidermacs"))
+    yasnippet
     ))
 
 (defun hurricane-programming/init-virtualenvwrapper ()
@@ -434,3 +435,15 @@
     (aidermacs-use-architect-mode t)
     (aidermacs-architect-model "deepseek/deepseek-reasoner")
     (aidermacs-editor-model "deepseek/deepseek-reasoner")))
+
+(defun hurricane-programming/post-init-yasnippet ()
+  (progn
+    (yas-global-mode 1)
+    (set-face-background 'secondary-selection "gray")
+    (setq-default yas-prompt-functions '(yas-ido-prompt yas-dropdown-prompt))
+    (mapc #'(lambda (hook) (remove-hook hook 'spacemacs/load-yasnippet)) '(prog-mode-hook
+                                                                      org-mode-hook
+                                                                      markdown-mode-hook))
+    (spacemacs/add-to-hooks 'hurricane//load-yasnippet '(prog-mode-hook
+                                                         org-mode-hook
+                                                         markdown-mode-hook))))
