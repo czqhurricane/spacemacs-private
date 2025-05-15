@@ -1126,7 +1126,9 @@
             rime-predicate-ace-window-p
             rime-predicate-hydra-p
             rime-predicate-which-key-activate-p
-            rime-predicate-local-map-p))
+            rime-predicate-local-map-p
+            rime-predicate-ediff-control-panel-p
+            rime-predicate-in-active-minibuffer-p))
 
     (defun +rime-force-enable ()
       "强制 `rime' 使用中文输入状态。
@@ -1186,6 +1188,15 @@
     (mapc #'dispatching-enchancer '(ivy-dispatching-done
                                     ivy-dispatching-call
                                     hydra-ivy/body))
+
+    (defun rime-predicate-ediff-control-panel-p ()
+      (derived-mode-p 'ediff-meta-mode))
+
+    (defun rime-predicate-in-active-minibuffer-p ()
+      "判断是否在活动的 minibuffer 中"
+      (and (active-minibuffer-window)
+           (eq (selected-window)
+               (active-minibuffer-window))))
 
     :custom
     (rime-librime-root "~/.emacs.d/librime/dist")
