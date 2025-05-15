@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: NSL0
+# key: NSL0
+# --
+NSLog("✅ `(buffer-name)` -> `(save-excursion (when (fboundp 'which-function) (which-function)))`, $0")
