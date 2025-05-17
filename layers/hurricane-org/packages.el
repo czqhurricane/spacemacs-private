@@ -1,6 +1,6 @@
 (defconst hurricane-org-packages
   `(
-    (org :location built-in)
+    ;; (org :location built-in)
     ;; (ox-latex :location built-in)
     ;; (ox-md :location built-in)
     ;; (org-protocol-capture-html :location (recipe
@@ -116,6 +116,14 @@
 (defun hurricane-org/post-init-org ()
   (with-eval-after-load 'org
     (progn
+      ;; (require 'ox-latex)
+      ;; (require 'ox-md)
+      ;; (require 'org-tree-slide)
+      ;; (require 'worf)
+      ;; (require 'org-compat)
+      ;; (require 'org-habit)
+      ;; (require 'org-emacs-lisp)
+      ;; (require 'ob-lisp)
       (spacemacs|disable-company org-mode)
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "," 'org-priority)
       (when sys/macp
@@ -583,16 +591,16 @@
       (pixel-scroll-mode)
       )))
 
-(defun hurricane-org/init-org-tree-slide ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (require 'org-tree-slide)))
+;; (defun hurricane-org/init-org-tree-slide ()
+;;   (spacemacs|use-package-add-hook org
+;;     :post-config
+;;     (require 'org-tree-slide)))
 
-(defun hurricane-org/init-worf ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (require 'worf)
-    (add-hook 'org-mode-hook #'worf-mode)))
+;; (defun hurricane-org/init-worf ()
+;;   (spacemacs|use-package-add-hook org
+;;     :post-config
+;;     (require 'worf)
+;;     (add-hook 'org-mode-hook #'worf-mode)))
 
 (defun hurricane-org/init-org-protocol ()
   (use-package org-protocol))
@@ -600,23 +608,23 @@
 (defun hurricane-org/init-org-protocol-capture-html ()
   (use-package org-protocol-capture-html))
 
-(defun hurricane-org/init-ox-latex ()
-  (spacemacs|use-package-add-hook org :post-config (require 'ox-latex)))
+;; (defun hurricane-org/init-ox-latex ()
+;;   (spacemacs|use-package-add-hook org :post-config (require 'ox-latex)))
 
-(defun hurricane-org/init-ox-md ()
-  (spacemacs|use-package-add-hook org :post-config (require 'ox-md)))
+;; (defun hurricane-org/init-ox-md ()
+;;   (spacemacs|use-package-add-hook org :post-config (require 'ox-md)))
 
-(defun hurricane-org/init-org-compat ()
-  (spacemacs|use-package-add-hook org :post-config (require 'org-compat)))
+;; (defun hurricane-org/init-org-compat ()
+;;   (spacemacs|use-package-add-hook org :post-config (require 'org-compat)))
 
-(defun hurricane-org/init-org-habit ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (require 'org-habit)
-    (add-to-list 'org-modules 'org-habit)))
+;; (defun hurricane-org/init-org-habit ()
+;;   (spacemacs|use-package-add-hook org
+;;     :post-config
+;;     (require 'org-habit)
+;;     (add-to-list 'org-modules 'org-habit)))
 
-(defun hurricane-org/init-org-emacs-lisp ()
-  (spacemacs|use-package-add-hook org :post-config (require 'org-emacs-lisp)))
+;; (defun hurricane-org/init-org-emacs-lisp ()
+;;   (spacemacs|use-package-add-hook org :post-config (require 'org-emacs-lisp)))
 
 ;; {{
 ;; @See: https://github.com/gregsexton/ob-ipython
@@ -626,21 +634,21 @@
 ;; Must install ipython and jupyter in ipy virtual envirnment first.
 ;; $ pip install ipython
 ;; $ pip install --upgrade jupyter
-(when sys/macp
-  (defun hurricane-org/init-ob-ipython ()
-    (spacemacs|use-package-add-hook org
-      :post-config
-      (require 'ob-ipython)
-      (progn
-        (when (file-exists-p jupyter-bin) (setq ob-ipython-command jupyter-bin))
-        (with-eval-after-load 'company
-          (add-to-list 'company-backends 'company-ob-ipython))
-        ;; Display/update images in the buffer after I evaluate.
-        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)))))
+;; (when sys/macp
+;;   (defun hurricane-org/init-ob-ipython ()
+;;     (spacemacs|use-package-add-hook org
+;;       :post-config
+;;       (require 'ob-ipython)
+;;       (progn
+;;         (when (file-exists-p jupyter-bin) (setq ob-ipython-command jupyter-bin))
+;;         (with-eval-after-load 'company
+;;           (add-to-list 'company-backends 'company-ob-ipython))
+;;         ;; Display/update images in the buffer after I evaluate.
+;;         (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)))))
 ;; }}
 
-(defun hurricane-org/init-ob-lisp ()
-  (spacemacs|use-package-add-hook org :post-config (require 'ob-lisp)))
+;; (defun hurricane-org/init-ob-lisp ()
+;;   (spacemacs|use-package-add-hook org :post-config (require 'ob-lisp)))
 
 (defun hurricane-org/post-init-org-download ()
   (progn
@@ -789,15 +797,15 @@
                                              ("\\begin{solution}{%s}\\end{solution}" . "\\subsubsection*{%s}"))))))
 ;; }}
 
-(defun hurricane-org/init-ox-html ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (require 'ox-html)))
+;; (defun hurricane-org/init-ox-html ()
+;;   (spacemacs|use-package-add-hook org
+;;     :post-config
+;;     (require 'ox-html)))
 
-(defun hurricane-org/init-ox-publish ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (require 'ox-publish)))
+;; (defun hurricane-org/init-ox-publish ()
+;;   (spacemacs|use-package-add-hook org
+;;     :post-config
+;;     (require 'ox-publish)))
 
 (defun hurricane-org/init-simple-httpd ()
   (use-package simple-httpd
