@@ -99,6 +99,7 @@
     (org-web-tools :location (recipe
                               :fetcher github
                               :repo "alphapapa/org-web-tools"))
+    (pdf-tools-annotations-db :location local)
     )
   )
 
@@ -2134,3 +2135,8 @@ customcontrols RevealCustomControls https://cdn.jsdelivr.net/npm/reveal.js-plugi
 
 (defun hurricane-org/init-org-web-tools ()
   (use-package org-web-tools))
+
+(defun hurricane-org/init-pdf-tools-annotations-db ()
+  (use-package pdf-tools-annotations-db
+    :custom
+    (pdf-tools-annotations-db-location "/Users/c/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/pdf-annotations.db")))

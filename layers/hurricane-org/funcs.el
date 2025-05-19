@@ -1317,8 +1317,11 @@ Show the heading too, if it is currently invisible."
             (content (replace-regexp-in-string "\n" " " (nth 6 x)))
             (full-filepath (nth 1 x))
             (outlines (nth 10 x)))
+       (if (not (string-empty-p outlines))
+           (setq outlines (format "%s%s" outlines " < "))
+         (setq outlines nil))
        (list
-        (format "%s%s" (propertize content 'face '((:foreground "SkyBlue2"))) (propertize (concat " < " outlines " < " (file-name-nondirectory full-filepath)) 'face '(shadow italic)))
+        (format "%s%s" (propertize content 'face '((:foreground "SkyBlue2"))) (propertize (concat " < " outlines (file-name-nondirectory full-filepath)) 'face '(shadow italic)))
         'pdf-tools
         page
         edges
@@ -1386,7 +1389,7 @@ Show the heading too, if it is currently invisible."
                    (elt x 2)
                    (cons (nth 1 (elt x 3))
                          (nth 0 (elt x 3))))
-                  (concat (elt x 4) " < " (elt x 6) " < " (file-name-nondirectory (elt x 5))))))))
+                  (concat (elt x 4) " < " (elt x 6) (file-name-nondirectory (elt x 5))))))))
 
 (with-eval-after-load 'ivy
   (ivy-add-actions
