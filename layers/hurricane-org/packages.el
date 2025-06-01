@@ -1961,9 +1961,9 @@ marked file."
                                                          (mapconcat 'identity (pdf-view-active-region-text) ? ))))
                     ;; (desc (concat file ".pdf: Page " page (when quote (concat "; Quoting: " quote))))
                     (desc (concat (when quote (concat quote " < ")) outlines " < " file ".pdf"))
-                    (link (hurricane//url-hexify-space-only (hurricane//org-noter-get-link))))
+                    (link (hurricane//org-noter-get-link)))
                (if pdf-view--have-rectangle-region
-                   (kill-new (format "<a href=\"%s\">%s</a>" (hurricane//url-hexify-space-only (format "[[%s]]" link)) (or desc link)))
+                   (kill-new (format "<a href=\"%s\">%s</a>" (format "[[%s]]" link) (or desc link)))
                  (kill-new (format "[[%s]][[%s]]" link desc)))
                (org-link-store-props
                 :type org-noter-property-note-location
@@ -2022,7 +2022,7 @@ marked file."
       (let ((ext (file-name-extension path)))
         (cond
          ((eq 'html backend)
-          (format "<a href=\"%s\">%s</a>" (hurricane//url-hexify-space-only (format "[[%s:%s]]" org-noter-property-note-location path)) (or desc path))
+          (format "<a href=\"%s\">%s</a>" (format "[[%s:%s]]" org-noter-property-note-location path) (or desc path))
           )
          ;; fall-through case for everything else.
          (t
