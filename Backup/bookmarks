@@ -34,10 +34,6 @@
  (handler . eaf--bookmark-restore)
  (eaf-app . "browser")
  (filename . "https://hackaday.com/2018/06/08/who-said-thermal-cameras-werent-accessible-to-the-masses/"))
-("打造终极智能手表！| LiDAR 与无线控制功能 | 网关（操作指南） --- Build The Ultimate Smartwatch! | LiDAR and Wireless Control Capabilities | Gateway (How To)"
- (handler . eaf--bookmark-restore)
- (eaf-app . "browser")
- (filename . "https://www.roboticworx.io/p/build-the-ultimate-smartwatch-lidar"))
 ("Build Custom ESP32 Boards From Scratch! | The Complete Guide to Designing Your Own ESP32-S3 and C3 | Full Tutorial"
  (handler . eaf--bookmark-restore)
  (eaf-app . "browser")
@@ -364,11 +360,11 @@
  (rear-context-string . " Mar 21  2021   ")
  (position . 221))
 ("org-capture-last-stored"
- (filename . "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/notes/将文件复制到 xcode 模拟器 iCloud 文件夹.org")
+ (filename . "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/notes/PDF 坐标系与视图坐标系的区别与联系.org")
  (front-context-string)
  (rear-context-string . "EY:\n#+PAGE_KEY:\n")
- (position . 359)
- (last-modified 26653 35394 201251 0))
+ (position . 343)
+ (last-modified 26686 37173 170988 0))
 ("WebDownloads"
  (filename . "~/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/WebDownloads/")
  (front-context-string . "FIM手册在波音飞机排故中的应用")

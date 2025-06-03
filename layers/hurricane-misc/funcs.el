@@ -2921,8 +2921,7 @@ Version 2019-02-12 2021-08-09"
                (pdf-path (hurricane/get-pdf-path-from-db pdf-filename)))
           (if (file-exists-p pdf-path)
               (blink-search-grep-pdf-do pdf-path page-num content)
-            (message "PDF file not found: %s" pdf-path))
-          ))
+            (message "PDF file not found: %s" pdf-path))))
     (funcall orig-fun cand other-window)))
 
 ;; 辅助函数：从数据库查询 PDF 路径
@@ -2983,14 +2982,6 @@ Version 2019-02-12 2021-08-09"
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (make-frame-visible doc-frame)
     (select-frame-set-input-focus doc-frame)))
-
-(defun hurricane//dogears-go-delete-place-action (x)
-  (print x))
-
-(with-eval-after-load 'ivy
-  (ivy-add-actions
-   #'dogears-go
-   '(("d" hurricane//dogears-go-delete-place-action "@Delete place"))))
 
 (defun hurricane/document-contents-extractor ()
   (interactive)

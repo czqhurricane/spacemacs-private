@@ -14,7 +14,7 @@
  '(custom-safe-themes
    '("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
  '(debug-on-error t)
- '(dired-quick-sort-suppress-setup-warning t t)
+ '(dired-quick-sort-suppress-setup-warning t)
  '(doom-modeline-buffer-file-name-style 'truncate-with-project)
  '(doom-modeline-icon t)
  '(doom-modeline-major-mode-icon nil)
@@ -72,7 +72,11 @@
  '(rustic-ansi-faces
    ["#FDF6E3" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
  '(safe-local-variable-values
-   '((eval setq org-download-image-dir
+   '((eval setq org-media-note-screenshot-image-dir
+           (concat default-directory "./static/xCode update/"))
+     (eval setq org-media-note-screenshot-image-dir
+           (concat default-directory "./static/iOS 使用 Carthage 管理第三方套件/"))
+     (eval setq org-download-image-dir
            (concat default-directory "./static/printf() 函数转换说明"))
      (eval setq org-media-note-screenshot-image-dir
            (concat default-directory "./static/Elfeed PR/"))
