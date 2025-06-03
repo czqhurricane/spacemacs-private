@@ -114,10 +114,8 @@ The query is expected to be able to fail, in this situation, run HANDLER."
 
     (files
      [(file :unique :primary-key)
-      title
-      (hash :not-null)
-      (atime :not-null)
-      (mtime :not-null)])
+      (title :not-null)
+      ])
 
     (annotations
      ([(id :not-null :primary-key)
@@ -199,14 +197,15 @@ If FILE is nil, clear the current buffer."
 If HASH is non-nil, use that as the file's hash without recalculating it."
   (let* ((file (buffer-file-name))
          (title (file-name-nondirectory file))
-         (attr (file-attributes file))
-         (atime (file-attribute-access-time attr))
-         (mtime (file-attribute-modification-time attr))
-         (hash (or hash (pdf-tools-annotations-db--file-hash file))))
+         ;; (attr (file-attributes file))
+         ;; (atime (file-attribute-access-time attr))
+         ;; (mtime (file-attribute-modification-time attr))
+         ;; (hash (or hash (pdf-tools-annotations-db--file-hash file)))
+         )
     (pdf-tools-annotations-db-query
      [:insert :into files
               :values $v1]
-     (list (vector file title hash atime mtime)))))
+     (list (vector file title)))))
 
 ;;;; Annotation operations
 (defun get-all-annotations-from-pdf (&optional file)
@@ -371,7 +370,7 @@ their contents."
            (current-time (butlast (current-time) 2)))
       (when force
         (pdf-tools-annotations-db-clear-file file))
-      (pdf-tools-annotations-db-insert-file)
+      ;; (pdf-tools-annotations-db-insert-file)
       (->>
        (get-all-annotations-from-pdf)
        (pdf-tools-filte-empty-annotations)
