@@ -2799,7 +2799,7 @@ Version 2019-02-12 2021-08-09"
          (result nil))
     (when (yes-or-no-p (format "Do you want to execute the command in the directory: %s?" local-root))
       (setq default-directory local-root)
-      (let* ((command (list "python3" (expand-file-name gbk2utf-8-Python-file)))
+      (let* ((command (list eaf-python-command (expand-file-name gbk2utf-8-Python-file)))
              (output-buffer (generate-new-buffer "*gbk2utf-8-output*"))
              (exit-code (apply 'call-process (car command) nil output-buffer t (cdr command))))
         (if (eq exit-code 0)
