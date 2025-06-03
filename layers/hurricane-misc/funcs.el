@@ -2812,15 +2812,29 @@ Version 2019-02-12 2021-08-09"
           (switch-to-buffer output-buffer))))
     result))
 
+(defun hurricane/dired-get-marked-files-only ()
+  "Return marked files in dired only if there are explicitly marked files.
+   Return nil if no files are marked (instead of returning current file at point)."
+  (let ((marked (dired-get-marked-files)))
+    (when (> (length marked) 0)
+      ;; 检查是否只是当前文件（没有明确标记）
+      (if (and (= (length marked) 1)
+               (equal (car marked) (dired-get-filename nil t)))
+          ;; 如果只是当前文件且没有明确标记，返回 nil
+          (when (dired-file-marker (dired-get-filename nil t))
+            marked)
+        ;; 否则返回标记的文件
+        marked))))
+
 (defun hurricane/recursively-convert-comments-style ()
   (interactive)
   (let* ((local-root (or (hurricane//git-project-root) default-directory))
-         (marked-files (dired-get-marked-files))
+         (marked-files (hurricane/dired-get-marked-files-only))
          (result nil))
     (when (yes-or-no-p (format "Do you want to execute the command with these files or in the directory: %s?"
                                (or
-                                (and (not (null (dired-get-marked-files)))
-                                     (mapconcat 'identity (dired-get-marked-files) " ") )
+                                (and marked-files
+                                     (mapconcat 'identity marked-files " ") )
                                 local-root)))
       (setq default-directory local-root)
       (let* ((command (append (list "python3" (expand-file-name convert-comments-style-Python-file)) marked-files))
@@ -2839,12 +2853,12 @@ Version 2019-02-12 2021-08-09"
 (defun hurricane/recursively-clean-comments ()
   (interactive)
   (let* ((local-root (or (hurricane//git-project-root) default-directory))
-         (marked-files (dired-get-marked-files))
+         (marked-files (hurricane/dired-get-marked-files-only))
          (result nil))
     (when (yes-or-no-p (format "Do you want to execute the command with these files or in the directory: %s?"
                                (or
-                                (and (not (null (dired-get-marked-files)))
-                                     (mapconcat 'identity (dired-get-marked-files) " ") )
+                                (and marked-files
+                                     (mapconcat 'identity marked-files " ") )
                                 local-root)))
       (setq default-directory local-root)
       (let* ((command (append (list "python3" (expand-file-name clean-comments-Python-file)) marked-files))
@@ -2860,6 +2874,72 @@ Version 2019-02-12 2021-08-09"
           (switch-to-buffer output-buffer))))
     result))
 
+(defun hurricane/recursively-build-reverse-index ()
+  "Build reverse index for PDF files using build_reverse_index.py"
+  (interactive)
+  (let* ((local-root (or (file-name-directory pdf-tools-annotations-db-location)
+                         default-directory))
+         (marked-files (hurricane/dired-get-marked-files-only))
+         (result nil))
+    (when (yes-or-no-p (format "Do you want to build reverse index for files in directory: %s?"
+                               (or
+                                (and (not (null marked-files))
+                                     (mapconcat 'identity marked-files " ") )
+                                local-root)))
+      (setq default-directory local-root)
+      (let* ((command (append (list eaf-python-command (expand-file-name build-reverse-index-Python-file)) marked-files))
+             (output-buffer (generate-new-buffer "*build-reverse-index*"))
+             (exit-code (apply 'call-process (car command) nil output-buffer t (cdr command))))
+        (if (eq exit-code 0)
+            (progn
+              (setq result (with-current-buffer output-buffer
+                             (buffer-string)))
+              (message "Reverse index built successfully: %s" result)
+              (kill-buffer output-buffer))
+          (message "Error building reverse index. Check *build-reverse-index* buffer for details.")
+          (switch-to-buffer output-buffer))))
+    result))
+
+(defun hurricane/pdf-tools-folder-search ()
+  "Search text within PDF files using grep for better performance"
+  (interactive)
+  (let ((in-folder-search t))  ;; 设置上下文标记
+    (advice-add 'counsel--git-grep-visit :around #'hurricane//counsel--git-grep-visit)
+    (unwind-protect  ;; 确保始终移除 advice
+        (spacemacs/counsel-search '("rg") nil (expand-file-name "Cache" (file-name-directory pdf-tools-annotations-db-location)))
+      (advice-remove 'counsel--git-grep-visit #'my/pdf-tools-grep-advice))))
+
+(defun hurricane//counsel--git-grep-visit (orig-fun cand &optional other-window)
+  (if (boundp 'in-folder-search) ;; 检查执行上下文
+      (when (string-match "^\\(.+\\):\\([0-9]+\\):\\([0-9]+\\):\\(.+\\)$" cand)
+        (let* ((file-path (match-string 1 cand))
+               (line-num (match-string 2 cand))
+               (page-num (string-to-number (match-string 3 cand)))
+               (content (match-string 4 cand))
+               (txt-filename (file-name-nondirectory file-path))
+               (pdf-filename (replace-regexp-in-string ".txt$" ".pdf" txt-filename))
+               (pdf-path (hurricane/get-pdf-path-from-db pdf-filename)))
+          (if (file-exists-p pdf-path)
+              (blink-search-grep-pdf-do pdf-path page-num content)
+            (message "PDF file not found: %s" pdf-path))
+          ))
+    (funcall orig-fun cand other-window)))
+
+;; 辅助函数：从数据库查询 PDF 路径
+(defun hurricane/get-pdf-path-from-db (pdf-filename)
+  "Query PDF file path from pdf-annotations.db based on title"
+  (let* ((local-root (or (file-name-directory pdf-tools-annotations-db-location)
+                         default-directory))
+         (db-path (expand-file-name "pdf-annotations.db" local-root))
+         (sql-query (format "SELECT file FROM files WHERE title = '%s';" pdf-filename))
+         (result nil))
+    (when (file-exists-p db-path)
+      (with-temp-buffer
+        (let ((exit-code (call-process "sqlite3" nil t nil db-path sql-query)))
+          (when (eq exit-code 0)
+            (setq result (string-trim (buffer-string)))
+            (when (not (string-empty-p result))
+              result)))))))
 
 (defun make-search-frame (x)
   (let (summary
