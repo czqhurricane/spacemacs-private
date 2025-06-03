@@ -2915,7 +2915,7 @@ Version 2019-02-12 2021-08-09"
         (let* ((file-path (match-string 1 cand))
                (line-num (match-string 2 cand))
                (page-num (string-to-number (match-string 3 cand)))
-               (content (match-string 4 cand))
+               (content (string-trim (match-string 4 cand)))
                (txt-filename (file-name-nondirectory file-path))
                (pdf-filename (replace-regexp-in-string ".txt$" ".pdf" txt-filename))
                (pdf-path (hurricane/get-pdf-path-from-db pdf-filename)))
