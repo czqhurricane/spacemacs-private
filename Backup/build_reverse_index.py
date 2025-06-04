@@ -61,7 +61,7 @@ def insert_file_record(db_path, file_path, title):
         # 检查是否已存在相同记录
         cursor.execute('SELECT file FROM files WHERE file = ? AND title = ?', (file_path, title))
         if cursor.fetchone():
-            print(f"数据库中已存在记录: {title}")
+            print(f"数据库中已存在记录: {title} - {file}")
             conn.close()
             return
 
@@ -127,14 +127,14 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         # 没有参数，处理当前目录下的所有PDF文件
         pdf_files = getDirFiles('.')
-        print(f"找到 {len(pdf_files)} 个PDF文件")
+        print(f"找到 {len(pdf_files)} 个 PDF 文件")
     else:
         # 处理指定的文件
         pdf_files = [f for f in sys.argv[1:] if f.lower().endswith('.pdf')]
-        print(f"指定处理 {len(pdf_files)} 个PDF文件")
+        print(f"指定处理 {len(pdf_files)} 个 PDF 文件")
 
     if not pdf_files:
-        print("没有找到PDF文件")
+        print("没有找到 PDF 文件")
         sys.exit(1)
 
     success_count = 0

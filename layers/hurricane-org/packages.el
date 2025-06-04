@@ -1,6 +1,6 @@
 (defconst hurricane-org-packages
   `(
-    ;; (org :location built-in)
+    org
     ;; (ox-latex :location built-in)
     ;; (ox-md :location built-in)
     ;; (org-protocol-capture-html :location (recipe
@@ -322,7 +322,8 @@
                         (language (gptel-context--buffer-suffix buffer)))
                     (with-current-buffer buffer
                       (let ((code (buffer-substring-no-properties start end)))
-                        (push (format "%s\n\n#+BEGIN_SRC %s\n%s#+END_SRC\n" (buffer-file-name) language code) selected-code))))))))))
+                        (push (format "%s\n\n#+BEGIN_SRC %s\n%s\n#+END_SRC\n" (buffer-file-name) language code) selected-code))))))))
+          selected-code))
 
       (setq org-capture-templates
             '(("t" "Todo" entry (file+headline org-agenda-file-gtd "Workspace")

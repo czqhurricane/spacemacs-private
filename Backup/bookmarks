@@ -360,11 +360,11 @@
  (rear-context-string . " Mar 21  2021   ")
  (position . 221))
 ("org-capture-last-stored"
- (filename . "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/notes/PDF 坐标系与视图坐标系的区别与联系.org")
- (front-context-string)
- (rear-context-string . "EY:\n#+PAGE_KEY:\n")
- (position . 343)
- (last-modified 26686 37173 170988 0))
+ (filename . "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/notes/snippet.org")
+ (front-context-string . "* test          ")
+ (rear-context-string . "* TIM_DMAConfig\n")
+ (position . 21783)
+ (last-modified 26687 64165 306015 0))
 ("WebDownloads"
  (filename . "~/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/WebDownloads/")
  (front-context-string . "FIM手册在波音飞机排故中的应用")
