@@ -2917,8 +2917,8 @@ Version 2019-02-12 2021-08-09"
                (page-num (string-to-number (match-string 3 cand)))
                (content (string-trim (match-string 4 cand)))
                (txt-filename (file-name-nondirectory file-path))
-               (pdf-filename (replace-regexp-in-string ".txt$" ".pdf" txt-filename))
-               (pdf-path (hurricane/get-pdf-path-from-db pdf-filename)))
+               (filename (file-name-sans-extension txt-filename))
+               (pdf-path (hurricane/get-pdf-path-from-db filename)))
           (if (file-exists-p pdf-path)
               (blink-search-grep-pdf-do pdf-path page-num content)
             (message "PDF file not found: %s" pdf-path))))
@@ -2932,9 +2932,11 @@ Version 2019-02-12 2021-08-09"
          (db-path (expand-file-name "pdf-annotations.db" local-root))
          (sql-query (format "SELECT file FROM files WHERE title = '%s';" pdf-filename))
          (result nil))
+
     (when (file-exists-p db-path)
       (with-temp-buffer
-        (let ((exit-code (call-process "sqlite3" nil t nil db-path sql-query)))
+        (let* ((output-buffer (generate-new-buffer "*get-pdf-path-from-db*"))
+               (exit-code (call-process "sqlite3" nil t nil db-path sql-query)))
           (when (eq exit-code 0)
             (setq result (string-trim (buffer-string)))
             (when (not (string-empty-p result))

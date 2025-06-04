@@ -83,13 +83,13 @@ def process_pdf(pdf_path, cache_dir, db_path):
         txt_name = os.path.splitext(pdf_name)[0] + '.txt'
         output_path = os.path.join(cache_dir, txt_name)
 
+        # 如果 pdf_name 不存在，将信息写入数据库
+        insert_file_record(db_path, os.path.abspath(pdf_name), pdf_name)
+
         # 如果已经处理过，跳过
         if os.path.exists(output_path):
             print(f"跳过已处理的文件: {pdf_name}")
             return True
-
-        # 如果 output_path 不存在，将信息写入数据库
-        insert_file_record(db_path, os.path.abspath(pdf_name), pdf_name)
 
         print(f"处理文件: {pdf_name}")
 
