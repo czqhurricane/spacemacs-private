@@ -361,10 +361,10 @@
  (position . 221))
 ("org-capture-last-stored"
  (filename . "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/braindump/notes/snippet.org")
- (front-context-string . "* test          ")
+ (front-context-string . "* func.el \n /Use")
  (rear-context-string . "* TIM_DMAConfig\n")
  (position . 21783)
- (last-modified 26687 64165 306015 0))
+ (last-modified 26689 46765 666456 0))
 ("WebDownloads"
  (filename . "~/Library/Mobile Documents/iCloud~QReader~MarginStudy/Documents/WebDownloads/")
  (front-context-string . "FIM手册在波音飞机排故中的应用")

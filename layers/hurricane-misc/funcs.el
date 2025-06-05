@@ -2900,29 +2900,152 @@ Version 2019-02-12 2021-08-09"
           (switch-to-buffer output-buffer))))
     result))
 
+;; 为自定义的 counsel 函数配置高亮显示
+(with-eval-after-load 'ivy
+  (ivy-configure 'hurricane/counsel-ag
+    :display-transformer-fn #'counsel-git-grep-transformer)
+
+  (ivy-configure 'hurricane/counsel-rg
+    :display-transformer-fn #'counsel-git-grep-transformer)
+
+  (ivy-configure 'hurricane/pdf-tools-folder-search
+    :display-transformer-fn #'counsel-git-grep-transformer))
+
+;; 为 PDF 搜索创建专门的 counsel-rg 版本
+(cl-defun hurricane/counsel-rg (&optional initial-input initial-directory extra-rg-args rg-prompt
+                                          &key caller)
+  "Custom counsel-rg for PDF search with custom action."
+  (interactive)
+  (let ((counsel-ag-base-command
+         (if (listp counsel-rg-base-command)
+             (append counsel-rg-base-command (counsel--rg-targets))
+           (concat counsel-rg-base-command " "
+                   (mapconcat #'shell-quote-argument (counsel--rg-targets) " "))))
+        (counsel--grep-tool-look-around
+         (let ((rg (car (if (listp counsel-rg-base-command) counsel-rg-base-command
+                          (split-string counsel-rg-base-command))))
+               (switch "--pcre2"))
+           (and (eq 0 (call-process rg nil nil nil switch "--pcre2-version"))
+                switch))))
+    (hurricane/counsel-ag initial-input initial-directory extra-rg-args rg-prompt
+                          :caller (or caller 'hurricane/counsel-rg))))
+
+;; 为 PDF 搜索创建专门的 counsel-ag 版本
+(cl-defun hurricane/counsel-ag (&optional initial-input initial-directory extra-ag-args ag-prompt
+                                          &key caller)
+  "Custom counsel-ag for PDF search with custom action."
+  (interactive)
+  (setq counsel-ag-command counsel-ag-base-command)
+  (setq counsel--regex-look-around counsel--grep-tool-look-around)
+  (counsel-require-program counsel-ag-command)
+  (let ((prog-name (car (if (listp counsel-ag-command) counsel-ag-command
+                          (split-string counsel-ag-command))))
+        (arg (prefix-numeric-value current-prefix-arg)))
+    (when (>= arg 4)
+      (setq initial-directory
+            (or initial-directory
+                (counsel-read-directory-name (concat
+                                              prog-name
+                                              " in directory: ")))))
+    (when (>= arg 16)
+      (setq extra-ag-args
+            (or extra-ag-args
+                (read-from-minibuffer (format "%s args: " prog-name)))))
+    (setq counsel-ag-command (counsel--format-ag-command (or extra-ag-args "") "%s"))
+    (let ((default-directory (or initial-directory
+                                 (counsel--git-root)
+                                 default-directory)))
+      (ivy-read (or ag-prompt
+                    (concat prog-name ": "))
+                #'counsel-ag-function
+                :initial-input initial-input
+                :dynamic-collection t
+                :keymap counsel-ag-map
+                :history 'counsel-git-grep-history
+                ;; 使用自定义的 action
+                :action #'hurricane//counsel--git-grep-visit-wrapper
+                :require-match t
+                :caller (or caller 'hurricane/counsel-ag)))))
+
+;; 修改主函数使用自定义版本
 (defun hurricane/pdf-tools-folder-search ()
   "Search text within PDF files using grep for better performance"
   (interactive)
-  (let ((in-folder-search t))  ;; 设置上下文标记
-    (advice-add 'counsel--git-grep-visit :around #'hurricane//counsel--git-grep-visit)
-    (unwind-protect  ;; 确保始终移除 advice
-        (spacemacs/counsel-search '("rg") nil (expand-file-name "Cache" (file-name-directory pdf-tools-annotations-db-location)))
-      (advice-remove 'counsel--git-grep-visit #'my/pdf-tools-grep-advice))))
+  (hurricane/spacemacs-counsel-search
+   '("rg") nil
+   (expand-file-name "Cache" (file-name-directory pdf-tools-annotations-db-location))))
 
+;; 创建自定义的 spacemacs/counsel-search 版本
+(defun hurricane/spacemacs-counsel-search
+    (&optional tools use-initial-input initial-directory)
+  "Custom search function for PDF tools with custom actions."
+  (interactive)
+  (require 'counsel)
+  (cl-letf* ((initial-input (if use-initial-input
+                                (rxt-quote-pcre
+                                 (if (region-active-p)
+                                     (buffer-substring-no-properties
+                                      (region-beginning) (region-end))
+                                   (or (thing-at-point 'symbol t) "")))
+                              ""))
+             (tool (catch 'tool
+                     (dolist (tool tools)
+                       (when (and (assoc-string tool spacemacs--counsel-commands)
+                                  (executable-find tool))
+                         (throw 'tool tool)))
+                     (throw 'tool "grep")))
+             (default-directory
+              (or initial-directory (read-directory-name "Start from directory: ")))
+             (display-directory
+              (if (< (length default-directory)
+                     spacemacs--counsel-search-max-path-length)
+                  default-directory
+                (concat
+                 "..." (substring default-directory
+                                  (- (length default-directory)
+                                     spacemacs--counsel-search-max-path-length)
+                                  (length default-directory))))))
+    (cond ((string= tool "ag")
+           (hurricane/counsel-ag initial-input default-directory nil
+                                 (format "ag from [%s]: " display-directory)))
+          ((string= tool "rg")
+           (hurricane/counsel-rg initial-input default-directory nil
+                                 (format "rg from [%s]: " display-directory)))
+          (t
+           (ivy-read
+            (format "%s from [%s]: "
+                    tool
+                    display-directory)
+            (spacemacs//make-counsel-search-function tool)
+            :initial-input (when initial-input (rxt-quote-pcre initial-input))
+            :dynamic-collection t
+            :history 'counsel-git-grep-history
+            :action #'hurricane//counsel--git-grep-visit-wrapper
+            :caller 'hurricane/pdf-tools-folder-search
+            :keymap spacemacs--counsel-map
+            :unwind (lambda ()
+                      (counsel-delete-process)
+                      (swiper--cleanup)))))))
+
+;; Action wrapper 函数
+(defun hurricane//counsel--git-grep-visit-wrapper (cand)
+  "Wrapper function for custom PDF search action."
+  (hurricane//counsel--git-grep-visit #'counsel--git-grep-visit cand))
+
+;; 简化的自定义访问函数
 (defun hurricane//counsel--git-grep-visit (orig-fun cand &optional other-window)
-  (if (boundp 'in-folder-search) ;; 检查执行上下文
-      (when (string-match "^\\(.+\\):\\([0-9]+\\):\\([0-9]+\\):\\(.+\\)$" cand)
-        (let* ((file-path (match-string 1 cand))
-               (line-num (match-string 2 cand))
-               (page-num (string-to-number (match-string 3 cand)))
-               (content (string-trim (match-string 4 cand)))
-               (txt-filename (file-name-nondirectory file-path))
-               (filename (file-name-sans-extension txt-filename))
-               (pdf-path (hurricane/get-pdf-path-from-db filename)))
-          (if (file-exists-p pdf-path)
-              (blink-search-grep-pdf-do pdf-path page-num content)
-            (message "PDF file not found: %s" pdf-path))))
-    (funcall orig-fun cand other-window)))
+  "Custom visit function for PDF search results."
+  (when (string-match "^\\(.+\\):\\([0-9]+\\):\\([0-9]+\\):\\(.+\\)$" cand)
+    (let* ((file-path (match-string 1 cand))
+           (line-num (match-string 2 cand))
+           (page-num (string-to-number (match-string 3 cand)))
+           (content (string-trim (match-string 4 cand)))
+           (txt-filename (file-name-nondirectory file-path))
+           (filename (file-name-sans-extension txt-filename))
+           (pdf-path (hurricane/get-pdf-path-from-db filename)))
+      (if (file-exists-p pdf-path)
+          (blink-search-grep-pdf-do pdf-path page-num content)
+        (message "PDF file not found: %s" pdf-path)))))
 
 ;; 辅助函数：从数据库查询 PDF 路径
 (defun hurricane/get-pdf-path-from-db (pdf-filename)
